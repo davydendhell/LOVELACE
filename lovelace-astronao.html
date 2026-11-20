@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LOVELACE · Uma nova cultura científica e tecnológica</title>
+<meta name="description" content="Protótipo LOVELACE: astronomia, ciências da natureza, robótica com o AstroNAO, música com IA e preparação para a redação do ENEM.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Poppins:wght@400;500;600;700;800&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Fonte OpenDyslexic (modo dislexia). Se estiver offline, o navegador usa Lexend/Verdana. -->
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/opendyslexic@5/index.css" rel="stylesheet">
+
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --fs: 100%;
+  --ls: 0em;           /* espaçamento entre letras */
+  --ws: 0em;           /* espaçamento entre palavras */
+  --lh: 1.6;           /* altura de linha */
+  --bg: #150a3a;
+  --bg2: #1e1058;
+  --card: rgba(255,255,255,.07);
+  --card-b: rgba(190,175,255,.28);
+  --ink: #f3eeff;
+  --muted: #cbbff5;
+  --violet: #6d5dfc;
+  --purple: #8b5cf6;
+  --lav: #e6dcff;
+  --ok: #3ddc97;
+  --bad: #ff6b8b;
+  --focus: #ffd84d;
+  --font-body: 'Poppins', system-ui, sans-serif;
+  --font-title: 'Bree Serif', Georgia, serif;
+}
+body.theme-cream{ --bg:#fbf3dc; --bg2:#f4e8c4; --card:#fffaf0; --card-b:#d9c9a0; --ink:#2b2418; --muted:#5b4f36; --violet:#4b3fd1; --purple:#5b3fc4; --lav:#2b2418; }
+body.theme-light{ --bg:#f4f6ff; --bg2:#e8ebff; --card:#ffffff; --card-b:#c9cdf2; --ink:#1a1a33; --muted:#43456b; --violet:#4b3fd1; --purple:#5b3fc4; --lav:#1a1a33; }
+body.theme-contrast{ --bg:#000; --bg2:#000; --card:#000; --card-b:#fff; --ink:#fff; --muted:#fff; --violet:#ffd84d; --purple:#ffd84d; --lav:#fff; }
+
+*{box-sizing:border-box}
+html{font-size:var(--fs); scroll-behavior:smooth}
+body{
+  margin:0; font-family:var(--font-body); color:var(--ink);
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%) fixed;
+  line-height:var(--lh); letter-spacing:var(--ls); word-spacing:var(--ws);
+}
+body.dys, body.dys *{ font-family:'OpenDyslexic','Lexend','Comic Sans MS',Verdana,sans-serif !important; }
+body.dys p, body.dys li{ text-align:left; }
+body.reduce *{ animation:none !important; transition:none !important; scroll-behavior:auto !important; }
+
+a{color:inherit}
+:focus-visible{ outline:3px solid var(--focus); outline-offset:3px; border-radius:6px; }
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:-999px;top:8px;background:var(--focus);color:#000;padding:.6rem 1rem;border-radius:8px;z-index:100;font-weight:700}
+.skip:focus{left:8px}
+
+/* ============ NAV ============ */
+nav.top{
+  position:sticky; top:0; z-index:50; display:flex; gap:.4rem; flex-wrap:wrap; align-items:center; justify-content:center;
+  padding:.6rem 1rem; background:color-mix(in srgb,var(--bg) 88%,transparent); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--card-b);
+}
+nav.top a{ text-decoration:none; padding:.4rem .9rem; border-radius:999px; font-weight:600; font-size:.9rem; color:var(--muted); }
+nav.top a:hover{ background:var(--card); color:var(--ink); }
+nav.top .brand{ font-weight:800; letter-spacing:.12em; color:var(--ink); margin-right:.6rem; }
+
+/* ============ HERO ============ */
+.hero{
+  position:relative; min-height:min(92vh,820px); display:grid; place-items:center; overflow:hidden; isolation:isolate;
+  background:radial-gradient(ellipse at 50% 40%, #2a1170 0%, #150a3a 70%);
+}
+body.theme-cream .hero, body.theme-light .hero, body.theme-contrast .hero{ --ink:#f3eeff; --lav:#e6dcff; --muted:#cbbff5; color:#f3eeff; }
+body.theme-contrast .hero{ background:#000; }
+.planet-wrap{ position:absolute; inset:0; display:grid; place-items:center; z-index:-1; }
+.planet{
+  position:relative; width:min(44vw,430px); aspect-ratio:1; border-radius:50%; z-index:1;
+  background:
+    repeating-linear-gradient(0deg, rgba(20,10,80,.35) 0 2px, transparent 2px 6px),
+    radial-gradient(circle at 50% 28%, #e4dcff 0%, #8f80ff 38%, #5b4bdb 70%, #3a2bb0 100%);
+  box-shadow:0 0 90px rgba(109,93,252,.55), inset -30px -40px 80px rgba(10,0,70,.55);
+  animation:float 9s ease-in-out infinite;
+}
+.ring{
+  position:absolute; width:min(100vw,1750px); aspect-ratio:2/1; border-radius:50%;
+  border:clamp(18px,3.2vw,46px) solid transparent;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.0) 0 4px, rgba(20,10,90,.25) 4px 6px) border-box,
+    linear-gradient(90deg,#6d5dfc,#b9acff,#6d5dfc) border-box;
+  -webkit-mask:linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0);
+  mask:linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  transform:rotate(-8deg) scaleY(.36);
+  filter:drop-shadow(0 0 22px rgba(130,110,255,.6));
+}
+.ring.back{ z-index:0; }
+.ring.front{ z-index:2; clip-path:polygon(0 50%,100% 50%,100% 100%,0 100%); }
+@keyframes float{ 50%{ transform:translateY(-12px) } }
+
+.star{ position:absolute; width:clamp(36px,5vw,70px); color:#8f84ff; filter:drop-shadow(0 0 10px #6d5dfc); animation:twinkle 4s ease-in-out infinite; }
+.star.s1{ top:4%; left:30%; transform:rotate(15deg) } .star.s2{ top:6%; right:22%; width:clamp(50px,7vw,100px); animation-delay:1.3s }
+.star.s3{ bottom:12%; left:10%; width:30px; animation-delay:2s } .star.s4{ top:30%; right:6%; width:26px; animation-delay:.6s }
+@keyframes twinkle{ 50%{ opacity:.45; transform:scale(.85) rotate(20deg) } }
+
+.hero-inner{ text-align:center; padding:2rem 1rem 4rem; width:100%; }
+.logo{ display:flex; justify-content:center; align-items:center; gap:.02em; font-weight:800; font-size:clamp(3.4rem,13vw,11.5rem); line-height:1; letter-spacing:0; margin:0; }
+.logo span{ display:inline-block; color:#fff; }
+.logo .l1{ color:var(--lav) } .logo .l2{ color:#8b5cf6 } .logo .e2{ color:var(--lav) }
+.logo .c{ color:transparent; -webkit-text-stroke:3px #e6dcff; margin-right:-.28em; }
+.logo svg.nao{ width:.98em; height:.98em; flex:none; margin:0 .02em; filter:drop-shadow(0 6px 14px rgba(0,0,0,.45)); animation:float 6s ease-in-out infinite; }
+.tagline{
+  display:inline-block; margin:.6rem 0 0; font-family:var(--font-title); font-size:clamp(1.3rem,4vw,3rem); font-weight:700;
+  color:#fff; transform:rotate(-3deg); text-shadow:3px 3px 0 rgba(15,5,60,.85);
+}
+.meta{ margin-top:2.4rem; font-weight:500; letter-spacing:.18em; color:#e6dcff; font-size:clamp(.8rem,1.6vw,1.1rem); }
+.hero-cta{ margin-top:1.6rem; display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap; }
+
+/* ============ BOTÕES / CARTÕES ============ */
+.btn{
+  appearance:none; border:0; cursor:pointer; font:inherit; font-weight:700; padding:.8rem 1.4rem; border-radius:14px;
+  background:linear-gradient(135deg,var(--purple),var(--violet)); color:#fff; text-decoration:none; display:inline-flex; gap:.5rem; align-items:center;
+  box-shadow:0 8px 22px rgba(109,93,252,.35); transition:transform .15s;
+}
+.btn:hover{ transform:translateY(-2px) }
+.btn.ghost{ background:transparent; border:2px solid var(--card-b); color:var(--ink); box-shadow:none; }
+body.theme-contrast .btn{ background:#ffd84d; color:#000; }
+.hero .btn.ghost{ color:#fff; border-color:rgba(230,220,255,.5) }
+
+section.block{ max-width:1100px; margin:0 auto; padding:4.5rem 1.2rem 1rem; }
+section.block > h2{ font-family:var(--font-title); font-size:clamp(1.8rem,4vw,2.6rem); margin:0 0 .3rem; }
+section.block > .lead{ color:var(--muted); max-width:70ch; margin:0 0 1.8rem; }
+.grid{ display:grid; gap:1rem; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); }
+.card{ background:var(--card); border:1px solid var(--card-b); border-radius:18px; padding:1.2rem; }
+.card h3{ margin:.2rem 0 .4rem; font-size:1.1rem }
+.card p{ margin:.2rem 0 .8rem; color:var(--muted); font-size:.95rem }
+.tag{ display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:.2rem .6rem; border-radius:999px; background:rgba(139,92,246,.22); color:var(--lav); }
+body.theme-cream .tag, body.theme-light .tag{ background:#e3defa; color:#2c1f8a }
+
+/* ============ VÍDEO-AULAS ============ */
+.video-card .thumb{ aspect-ratio:16/9; border-radius:12px; display:grid; place-items:center; font-size:2.4rem; margin-bottom:.8rem;
+  background:linear-gradient(135deg,#2b1b7a,#6d5dfc); color:#fff; }
+.video-card iframe{ width:100%; aspect-ratio:16/9; border:0; border-radius:12px; margin-bottom:.8rem; }
+
+/* ============ QUIZ ============ */
+.quiz{ display:grid; gap:1.2rem; grid-template-columns:160px 1fr; align-items:start; }
+.quiz .mascot{ text-align:center; }
+.quiz .mascot svg{ width:130px; height:130px; animation:float 6s ease-in-out infinite; }
+.quiz .mascot small{ display:block; color:var(--muted); font-weight:600; }
+.q-top{ display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; font-size:.9rem; color:var(--muted); font-weight:600; }
+.bar{ height:8px; background:var(--card); border-radius:99px; overflow:hidden; margin:.5rem 0 1rem; border:1px solid var(--card-b) }
+.bar i{ display:block; height:100%; width:0; background:linear-gradient(90deg,var(--purple),#b9acff); transition:width .3s; }
+.q-text{ font-size:1.15rem; font-weight:600; margin:.2rem 0 1rem; }
+.opts{ display:grid; gap:.6rem; }
+.opt{ text-align:left; font:inherit; padding:.85rem 1rem; border-radius:12px; border:2px solid var(--card-b); background:var(--card); color:var(--ink); cursor:pointer; }
+.opt:hover:not([disabled]){ border-color:var(--purple) }
+.opt.correct{ border-color:var(--ok); background:rgba(61,220,151,.16) }
+.opt.wrong{ border-color:var(--bad); background:rgba(255,107,139,.16) }
+.bubble{ margin-top:1rem; padding:1rem 1.1rem; border-radius:16px; background:rgba(139,92,246,.18); border:1px solid var(--card-b); display:none; }
+.bubble.show{ display:block }
+.q-actions{ display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1rem; }
+.result{ text-align:center; padding:1rem 0 }
+.result .big{ font-size:3rem; font-weight:800; font-family:var(--font-title) }
+@media(max-width:640px){ .quiz{ grid-template-columns:1fr } .quiz .mascot{ display:flex; align-items:center; gap:.8rem; text-align:left } .quiz .mascot svg{ width:72px;height:72px } }
+
+/* ============ MÚSICA ============ */
+.music{ display:grid; gap:1.2rem; grid-template-columns:1fr 1fr; }
+@media(max-width:800px){ .music{ grid-template-columns:1fr } }
+label{ display:block; font-weight:600; margin:.7rem 0 .25rem; font-size:.95rem }
+select,input[type=text],input[type=range],textarea{
+  width:100%; font:inherit; padding:.7rem .8rem; border-radius:12px; border:2px solid var(--card-b); background:var(--card); color:var(--ink);
+}
+select option{ color:#111 }
+textarea{ min-height:170px; resize:vertical; }
+.note{ font-size:.85rem; color:var(--muted); }
+.status{ margin-top:.8rem; font-size:.95rem; min-height:1.4em }
+audio{ width:100%; margin-top:.8rem }
+
+/* ============ REDAÇÕES ============ */
+.tabs{ display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1rem }
+.tab{ font:inherit; font-weight:600; padding:.55rem 1rem; border-radius:999px; border:2px solid var(--card-b); background:transparent; color:var(--ink); cursor:pointer }
+.tab[aria-selected="true"]{ background:var(--purple); border-color:var(--purple); color:#fff }
+body.theme-contrast .tab[aria-selected="true"]{ background:#ffd84d; color:#000 }
+.essay{ padding:1.6rem; }
+.essay h3{ font-family:var(--font-title); font-size:1.5rem; margin:.2rem 0 .3rem }
+.essay .theme{ color:var(--muted); font-size:.95rem; margin-bottom:1rem }
+.essay p{ margin:.2rem 0 1rem; text-indent:2.2em; max-width:75ch; text-align:left; }
+.essay p[data-label]::before{ display:none; content:attr(data-label); text-indent:0; font-size:.72rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--lav); background:rgba(139,92,246,.25); padding:.1rem .55rem; border-radius:99px; margin-bottom:.35rem; width:max-content; }
+.essay.structure p[data-label]{ display:flex; flex-direction:column; }
+.essay.structure p[data-label]::before{ display:block }
+.tools{ display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; margin:1rem 0 }
+.tools label{ display:inline-flex; gap:.5rem; align-items:center; margin:0; font-weight:500 }
+.tools input[type=checkbox]{ width:1.2rem; height:1.2rem }
+table{ width:100%; border-collapse:collapse; font-size:.95rem }
+th,td{ border:1px solid var(--card-b); padding:.6rem .7rem; text-align:left; vertical-align:top }
+th{ background:rgba(139,92,246,.22) }
+ul.clean{ padding-left:1.2rem; margin:.4rem 0 }
+
+footer{ text-align:center; padding:4rem 1rem 6rem; color:var(--muted); font-size:.9rem }
+
+/* ============ ACESSIBILIDADE ============ */
+#a11yBtn{
+  position:fixed; right:16px; bottom:16px; z-index:90; width:58px; height:58px; border-radius:50%; border:0; cursor:pointer;
+  background:var(--focus); color:#111; font-size:1.7rem; box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+#a11yPanel{
+  position:fixed; right:16px; bottom:86px; z-index:90; width:min(360px,calc(100vw - 32px)); max-height:75vh; overflow:auto;
+  background:#fff; color:#1a1a33; border-radius:18px; padding:1rem 1.1rem; box-shadow:0 20px 50px rgba(0,0,0,.45); display:none;
+  font-family:'Poppins',sans-serif; letter-spacing:0; word-spacing:0; line-height:1.5;
+}
+#a11yPanel.open{ display:block }
+#a11yPanel h2{ margin:.1rem 0 .6rem; font-size:1.1rem }
+#a11yPanel label{ margin:.6rem 0 .2rem }
+#a11yPanel select{ background:#fff; color:#111; border-color:#c9cdf2 }
+#a11yPanel .row{ display:flex; align-items:center; justify-content:space-between; gap:.8rem; margin:.4rem 0 }
+#a11yPanel .row span{ font-weight:600 }
+#a11yPanel input[type=checkbox]{ width:1.3rem; height:1.3rem }
+#a11yPanel input[type=range]{ padding:0; accent-color:#6d5dfc }
+#a11yPanel .btn{ padding:.5rem .9rem; font-size:.9rem; box-shadow:none }
+body.dys #a11yPanel, body.dys #a11yPanel *{ font-family:'OpenDyslexic','Lexend',Verdana,sans-serif !important }
+#ruler{ position:fixed; left:0; right:0; height:84px; top:40vh; z-index:80; pointer-events:none; display:none; box-shadow:0 0 0 100vmax rgba(0,0,0,.6); border-top:2px solid var(--focus); border-bottom:2px solid var(--focus); }
+body.ruler-on #ruler{ display:block }
+
+/* ============ IMPRESSÃO ============ */
+#printArea{ display:none }
+@media print{
+  @page{ margin:18mm }
+  body > *:not(#printArea){ display:none !important }
+  body{ background:#fff !important; color:#000 !important }
+  #printArea{ display:block !important; font-family:'Times New Roman',Georgia,serif !important; font-size:12pt; line-height:1.9; color:#000 }
+  #printArea h1{ font-size:15pt; margin:0 0 2pt; text-align:center }
+  #printArea .sub{ text-align:center; font-size:10pt; margin-bottom:14pt; color:#333 }
+  #printArea p{ text-indent:2.2em; text-align:justify; margin:0 0 4pt }
+  #printArea .lbl{ display:inline-block; font:700 8pt Arial,sans-serif; border:1px solid #000; padding:0 5pt; margin:4pt 0 1pt; text-indent:0 }
+  #printArea .foot{ margin-top:16pt; font:9pt Arial,sans-serif; border-top:1px solid #999; padding-top:6pt; color:#333 }
+  #printArea .line{ border-bottom:1px solid #777; height:24pt }
+  #printArea.dys, #printArea.dys *{ font-family:'OpenDyslexic','Lexend',Verdana,sans-serif !important; font-size:12pt }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#aulas">Pular para o conteúdo</a>
+
+<!-- ======= Símbolos SVG reutilizáveis ======= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="gHead" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#4f7bff"/><stop offset="1" stop-color="#0b2bb8"/></radialGradient>
+    <linearGradient id="gFace" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9defa"/></linearGradient>
+    <symbol id="nao" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="48" fill="url(#gHead)"/>
+      <path d="M18 40 Q50 4 82 40" fill="none" stroke="#bcd0ff" stroke-width="2.5" stroke-linecap="round" opacity=".9"/>
+      <circle cx="50" cy="20" r="3" fill="#0a1650"/>
+      <rect x="14" y="30" width="72" height="56" rx="28" fill="url(#gFace)"/>
+      <circle cx="34" cy="56" r="10" fill="#1f45ff"/><circle cx="66" cy="56" r="10" fill="#1f45ff"/>
+      <circle cx="34" cy="56" r="5.5" fill="#06124f"/><circle cx="66" cy="56" r="5.5" fill="#06124f"/>
+      <circle cx="31" cy="53" r="2" fill="#fff"/><circle cx="63" cy="53" r="2" fill="#fff"/>
+      <path d="M43 72 Q50 77 57 72" fill="none" stroke="#1f2a6b" stroke-width="2.4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="star4" viewBox="0 0 100 100">
+      <path d="M50 0 L58 42 L100 50 L58 58 L50 100 L42 58 L0 50 L42 42 Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<nav class="top" aria-label="Navegação principal">
+  <span class="brand">LOVELACE</span>
+  <a href="#aulas">Vídeo-aulas</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#musica">Música com IA</a>
+  <a href="#redacoes">Redações</a>
+  <a href="#enem">ENEM</a>
+</nav>
+
+<!-- ======= HERO ======= -->
+<header class="hero">
+  <div class="planet-wrap" aria-hidden="true">
+    <div class="ring back"></div>
+    <div class="planet"></div>
+    <div class="ring front"></div>
+  </div>
+  <svg class="star s1" aria-hidden="true"><use href="#star4"/></svg>
+  <svg class="star s2" aria-hidden="true"><use href="#star4"/></svg>
+  <svg class="star s3" aria-hidden="true"><use href="#star4"/></svg>
+  <svg class="star s4" aria-hidden="true"><use href="#star4"/></svg>
+
+  <div class="hero-inner">
+    <h1 class="logo" aria-label="LOVELACE">
+      <span class="l1" aria-hidden="true">L</span>
+      <svg class="nao" aria-hidden="true"><use href="#nao"/></svg>
+      <span aria-hidden="true">V</span><span aria-hidden="true">E</span>
+      <span class="l2" aria-hidden="true">L</span><span aria-hidden="true">A</span>
+      <span class="c" aria-hidden="true">C</span><span class="e2" aria-hidden="true">E</span>
+    </h1>
+    <p class="tagline">Uma nova cultura científica e tecnológica</p>
+    <p class="meta">NAO v6 • CETEC • 2026</p>
+    <div class="hero-cta">
+      <a class="btn" href="#quiz">🚀 Começar missão com o AstroNAO</a>
+      <a class="btn ghost" href="#redacoes">📝 Redações para imprimir</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- ======= VÍDEO-AULAS ======= -->
+<section class="block" id="aulas" aria-labelledby="h-aulas">
+  <h2 id="h-aulas">🎬 Vídeo-aulas de astronomia</h2>
+  <p class="lead">O AstroNAO separou temas de Ciências da Natureza com foco em astronomia. Cada cartão abre uma busca no YouTube já filtrada para o assunto. Você (professor/equipe) pode trocar por um vídeo específico: veja a lista <code>CONFIG.videos</code> no script.</p>
+  <div class="grid" id="videoGrid"></div>
+</section>
+
+<!-- ======= QUIZ ======= -->
+<section class="block" id="quiz" aria-labelledby="h-quiz">
+  <h2 id="h-quiz">🛰️ Missão AstroNAO: quiz de astronomia</h2>
+  <p class="lead">Questões no estilo ENEM sobre Terra, Lua, Sol, estrelas e exploração espacial. O AstroNAO explica cada resposta.</p>
+  <div class="card">
+    <div class="quiz">
+      <div class="mascot"><svg aria-hidden="true"><use href="#nao"/></svg><small>AstroNAO</small></div>
+      <div id="quizBox" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= MÚSICA ======= -->
+<section class="block" id="musica" aria-labelledby="h-musica">
+  <h2 id="h-musica">🎵 Estúdio de música com IA</h2>
+  <p class="lead">Transforme um conceito de astronomia em música para memorizar melhor. Gere o pedido (prompt), copie e abra o app de música com IA, ou envie direto por API se a equipe configurar um servidor.</p>
+  <div class="music">
+    <div class="card">
+      <label for="mTema">Conceito de astronomia</label>
+      <select id="mTema"></select>
+      <label for="mEstilo">Estilo musical</label>
+      <select id="mEstilo">
+        <option>forró pé de serra animado</option>
+        <option>funk consciente leve</option>
+        <option>rap educativo</option>
+        <option>pop eletrônico espacial</option>
+        <option>MPB suave</option>
+        <option>frevo moderno</option>
+        <option>lo-fi para estudar</option>
+      </select>
+      <label for="mTitulo">Título da música</label>
+      <input type="text" id="mTitulo" value="Viagem com o AstroNAO">
+      <div class="q-actions">
+        <button class="btn" id="mGerar" type="button">✨ Gerar pedido</button>
+        <button class="btn ghost" id="mCopiar" type="button">📋 Copiar</button>
+      </div>
+    </div>
+    <div class="card">
+      <label for="mPrompt">Pedido para a IA (editável)</label>
+      <textarea id="mPrompt"></textarea>
+      <div class="q-actions">
+        <a class="btn" id="mAbrir" href="#" target="_blank" rel="noopener">🎧 Abrir app de música IA</a>
+        <button class="btn ghost" id="mApi" type="button">🔌 Enviar via API</button>
+      </div>
+      <p class="status" id="mStatus" role="status"></p>
+      <audio id="mAudio" controls hidden></audio>
+      <p class="note">Segurança: nunca coloque chave de API dentro deste arquivo. Use um servidor seu (proxy) em <code>CONFIG.musica.apiUrl</code> que guarde a chave e devolva <code>{"audio_url": "..."}</code>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======= REDAÇÕES ======= -->
+<section class="block" id="redacoes" aria-labelledby="h-red">
+  <h2 id="h-red">📝 Redações prontas para imprimir</h2>
+  <p class="lead">Modelos dissertativo-argumentativos sobre astronomia e robótica com o personagem AstroNAO. Ative “Mostrar estrutura” para enxergar introdução, desenvolvimento e proposta de intervenção, e depois imprima.</p>
+  <div class="tabs" role="tablist" id="essayTabs" aria-label="Escolha a redação"></div>
+  <article class="card essay" id="essayView" role="tabpanel" tabindex="0"></article>
+  <div class="tools">
+    <label><input type="checkbox" id="chkStruct"> Mostrar estrutura</label>
+    <label><input type="checkbox" id="chkPrintStruct"> Incluir rótulos na impressão</label>
+    <button class="btn" id="btnPrint" type="button">🖨️ Imprimir esta redação</button>
+    <button class="btn ghost" id="btnPrintLines" type="button">📄 Folha pautada de rascunho</button>
+    <button class="btn ghost" id="btnSpeak" type="button">🔊 Ouvir redação</button>
+  </div>
+  <p class="note">Atenção: no ENEM, a redação precisa ser autoral. Estes textos são <strong>modelos de estudo</strong>. Observe a estrutura e depois escreva a sua com outro recorte e outros repertórios. O AstroNAO é um personagem didático; na prova, use repertório real (autores, leis, fatos).</p>
+</section>
+
+<!-- ======= ENEM ======= -->
+<section class="block" id="enem" aria-labelledby="h-enem">
+  <h2 id="h-enem">🎯 Como isso ajuda no ENEM</h2>
+  <p class="lead">Astronomia e robótica trazem repertório para a redação e treinam a leitura de textos científicos das Ciências da Natureza.</p>
+  <div class="card" style="overflow:auto">
+    <table>
+      <thead><tr><th>Competência</th><th>O que avalia</th><th>Como o LOVELACE treina</th></tr></thead>
+      <tbody>
+        <tr><td><strong>C1</strong></td><td>Domínio da norma culta</td><td>Leitura dos modelos, folha pautada e revisão com a lista abaixo.</td></tr>
+        <tr><td><strong>C2</strong></td><td>Compreensão do tema e repertório</td><td>Fatos reais de astronomia e tecnologia (exploração de Marte, Marcos Pontes, Ada Lovelace) como repertório produtivo.</td></tr>
+        <tr><td><strong>C3</strong></td><td>Seleção e organização de argumentos</td><td>Rótulos de estrutura: tese, argumento 1, argumento 2.</td></tr>
+        <tr><td><strong>C4</strong></td><td>Coesão textual</td><td>Observe conectivos como “Em primeiro lugar”, “Além disso”, “Portanto”.</td></tr>
+        <tr><td><strong>C5</strong></td><td>Proposta de intervenção</td><td>Modelos com agente, ação, meio, finalidade e detalhamento.</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Cada competência vale de 0 a 200 pontos (total de 1000).</p>
+  </div>
+  <div class="grid" style="margin-top:1rem">
+    <div class="card"><h3>✅ Checklist da proposta (C5)</h3>
+      <ul class="clean"><li>Quem vai agir (agente)?</li><li>O que será feito (ação)?</li><li>Como será feito (meio)?</li><li>Para quê (finalidade)?</li><li>Detalhe extra (exemplo, prazo, parceria)?</li><li>Respeita os direitos humanos?</li></ul></div>
+    <div class="card"><h3>🔭 Prova de Ciências da Natureza</h3>
+      <p>Questões sobre estações, fases da Lua, gravitação, energia das estrelas e efeito estufa aparecem em contextos cotidianos. Resolver o quiz acima treina esse tipo de raciocínio.</p></div>
+    <div class="card"><h3>🧠 Dica de estudo</h3>
+      <p>Assista a uma vídeo-aula, faça o quiz, ouça a música e escreva um parágrafo seu. Repetir esse ciclo ajuda a fixar o conteúdo.</p></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <p><strong>LOVELACE</strong> · NAO v6 · CETEC · 2026 - Idealizadores: Davyd Endhell (Endy) e Sophia Paiva (Sofi) <br>Nome inspirado em Ada Lovelace <a href= https://pt.wikipedia.org/wiki/Ada_Lovelace>História da Ada</p>
+</footer>
+
+<!-- ======= ÁREA DE IMPRESSÃO ======= -->
+<div id="printArea" aria-hidden="true"></div>
+
+<!-- ======= ACESSIBILIDADE ======= -->
+<div id="ruler" aria-hidden="true"></div>
+<button id="a11yBtn" type="button" aria-expanded="false" aria-controls="a11yPanel" aria-label="Abrir painel de acessibilidade">♿</button>
+<aside id="a11yPanel" aria-label="Painel de acessibilidade" role="dialog">
+  <h2>Acessibilidade e leitura</h2>
+  <div class="row"><span>Fonte para dislexia</span><input type="checkbox" id="aDys" aria-label="Fonte para dislexia"></div>
+  <label for="aSize">Tamanho do texto: <output id="oSize">100%</output></label>
+  <input type="range" id="aSize" min="90" max="170" step="5" value="100">
+  <label for="aLs">Espaço entre letras: <output id="oLs">0</output></label>
+  <input type="range" id="aLs" min="0" max="20" step="1" value="0">
+  <label for="aWs">Espaço entre palavras: <output id="oWs">0</output></label>
+  <input type="range" id="aWs" min="0" max="40" step="2" value="0">
+  <label for="aLh">Espaço entre linhas: <output id="oLh">1.6</output></label>
+  <input type="range" id="aLh" min="14" max="26" step="1" value="16">
+  <label for="aTheme">Cores</label>
+  <select id="aTheme">
+    <option value="">Roxo espacial (padrão)</option>
+    <option value="theme-cream">Creme (menos brilho)</option>
+    <option value="theme-light">Claro</option>
+    <option value="theme-contrast">Alto contraste</option>
+  </select>
+  <div class="row"><span>Régua de leitura</span><input type="checkbox" id="aRuler" aria-label="Régua de leitura"></div>
+  <div class="row"><span>Reduzir animações</span><input type="checkbox" id="aReduce" aria-label="Reduzir animações"></div>
+  <div class="row"><span>Ouvir texto selecionado</span><button class="btn" id="aSpeak" type="button">🔊 Ouvir</button></div>
+  <div class="row"><button class="btn ghost" id="aReset" type="button" style="color:#1a1a33;border-color:#c9cdf2">Restaurar padrão</button><button class="btn" id="aStop" type="button">⏹ Parar voz</button></div>
+</aside>
+
+<script>
+/* =====================================================================
+   CONFIGURAÇÃO — edite aqui
+   ===================================================================== */
+const CONFIG = {
+  /* Vídeo-aulas: use "id" (parte final do link youtube.com/watch?v=ID) para incorporar
+     o vídeo na página. Sem "id", o cartão abre uma busca no YouTube com "q". */
+  videos: [
+    { icone:"🌍", titulo:"Estações do ano e inclinação da Terra", area:"Física/Geografia", q:"estações do ano inclinação do eixo da Terra aula ENEM", id:"" },
+    { icone:"🌙", titulo:"Fases da Lua e eclipses",              area:"Física",           q:"fases da Lua e eclipses aula astronomia", id:"" },
+    { icone:"☀️", titulo:"Sol, estrelas e fusão nuclear",        area:"Física/Química",   q:"como o Sol produz energia fusão nuclear aula", id:"" },
+    { icone:"🪐", titulo:"Sistema Solar e planetas",             area:"Ciências",         q:"sistema solar planetas aula astronomia para estudantes", id:"" },
+    { icone:"🌊", titulo:"Gravitação, marés e órbitas",          area:"Física",           q:"gravitação universal marés órbitas Kepler aula", id:"" },
+    { icone:"🤖", titulo:"Robôs na exploração espacial",         area:"Tecnologia",       q:"robôs rovers exploração espacial Marte documentário em português", id:"" },
+    { icone:"🌌", titulo:"Galáxias, ano-luz e Big Bang",         area:"Física",           q:"galáxias ano-luz Big Bang aula astronomia", id:"" },
+    { icone:"🔥", titulo:"Efeito estufa em Vênus e na Terra",    area:"Química/Ecologia", q:"efeito estufa Vênus Terra atmosfera aula ENEM", id:"" }
+  ],
+  musica: {
+    /* App de música com IA que será aberto pelo botão (troque pelo app que a escola usar). */
+    appUrl: "https://suno.com",
+  }
+};
+
+/* =====================================================================
+   UTILIDADES
+   ===================================================================== */
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const store = {
+  get(k, d=null){ try{ const v = localStorage.getItem(k); return v===null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- Voz (leitura em voz alta) ---------- */
+function falar(texto){
+  if(!('speechSynthesis' in window)){ alert('Seu navegador não tem leitura em voz alta.'); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(texto);
+  u.lang = 'pt-BR'; u.rate = 0.9;
+  speechSynthesis.speak(u);
+}
+function pararVoz(){ if('speechSynthesis' in window) speechSynthesis.cancel(); }
+
+/* =====================================================================
+   VÍDEO-AULAS
+   ===================================================================== */
+function renderVideos(){
+  $('#videoGrid').innerHTML = CONFIG.videos.map(v => {
+    const media = v.id
+      ? `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.id)}" title="${esc(v.titulo)}" loading="lazy" allowfullscreen></iframe>`
+      : `<div class="thumb" aria-hidden="true">${v.icone}</div>`;
+    const href = v.id
+      ? `https://www.youtube.com/watch?v=${encodeURIComponent(v.id)}`
+      : `https://www.youtube.com/results?search_query=${encodeURIComponent(v.q)}`;
+    return `<div class="card video-card">${media}
+      <span class="tag">${esc(v.area)}</span>
+      <h3>${esc(v.titulo)}</h3>
+      <a class="btn" href="${href}" target="_blank" rel="noopener">▶ Assistir no YouTube</a>
+    </div>`;
+  }).join('');
+}
+
+/* =====================================================================
+   QUIZ
+   ===================================================================== */
+const QUESTOES = [
+  { q:"No Brasil, o verão é mais quente que o inverno. Qual é a principal causa das estações do ano?",
+    o:["A distância da Terra ao Sol muda muito ao longo do ano.","A inclinação do eixo de rotação da Terra em relação ao plano da órbita.","As manchas solares aparecem somente no verão.","A Lua aproxima-se da Terra no verão."],
+    a:1, e:"A inclinação do eixo (cerca de 23,5°) faz com que cada hemisfério receba raios solares mais ou menos diretos ao longo do ano. A distância Terra–Sol varia pouco." },
+  { q:"As fases da Lua (nova, crescente, cheia, minguante) acontecem porque:",
+    o:["a sombra da Terra cobre partes diferentes da Lua todos os dias.","a Lua muda de tamanho ao longo do mês.","vemos partes diferentes da face iluminada da Lua conforme sua posição em relação ao Sol e à Terra.","as nuvens escondem parte da Lua."],
+    a:2, e:"A Lua sempre tem metade iluminada pelo Sol. Ao orbitar a Terra, vemos proporções diferentes dessa metade. A sombra da Terra só aparece nos eclipses lunares." },
+  { q:"Um eclipse solar ocorre quando:",
+    o:["a Terra fica entre o Sol e a Lua.","a Lua fica entre o Sol e a Terra, projetando sombra sobre uma região da Terra.","o Sol passa atrás de um planeta.","a Lua fica entre Marte e a Terra."],
+    a:1, e:"No eclipse solar a Lua (em fase de lua nova) se alinha entre o Sol e a Terra. No eclipse lunar é a Terra que fica entre o Sol e a Lua." },
+  { q:"Qual força mantém a Terra e os demais planetas em órbita ao redor do Sol?",
+    o:["Força magnética dos polos.","Força de atrito com o espaço.","Força gravitacional.","Força de empuxo."],
+    a:2, e:"A atração gravitacional do Sol, aliada ao movimento dos planetas, faz com que eles descrevam órbitas. Não existe atrito significativo no vácuo espacial." },
+  { q:"A luz do Sol leva cerca de 8 minutos para chegar à Terra. O que isso nos ensina sobre o que vemos no céu?",
+    o:["Que enxergamos o Sol como ele era alguns minutos atrás.","Que a luz é instantânea.","Que o Sol está a poucos quilômetros.","Que a luz viaja mais devagar que o som."],
+    a:0, e:"A luz tem velocidade finita (cerca de 300 mil km/s). Por isso vemos os astros como eram no passado, e para estrelas distantes essa diferença pode ser de anos." },
+  { q:"“Ano-luz” é uma unidade de:",
+    o:["tempo.","distância.","velocidade.","brilho."],
+    a:1, e:"Um ano-luz é a distância que a luz percorre em um ano no vácuo, aproximadamente 9,5 trilhões de quilômetros." },
+  { q:"Qual processo produz a energia das estrelas como o Sol?",
+    o:["Combustão do carbono como numa fogueira.","Fissão de urânio no núcleo.","Fusão nuclear de núcleos de hidrogênio, formando hélio.","Reações químicas entre oxigênio e hidrogênio."],
+    a:2, e:"No núcleo do Sol, altíssimas temperatura e pressão fundem núcleos de hidrogênio em hélio, liberando enorme quantidade de energia." },
+  { q:"As marés oceânicas são causadas principalmente:",
+    o:["pelos ventos fortes.","pela atração gravitacional da Lua (e também do Sol) sobre a água dos oceanos.","pela rotação do núcleo da Terra.","pelo derretimento das calotas polares."],
+    a:1, e:"A atração gravitacional da Lua, principal responsável, e do Sol deforma a camada de água, formando as marés. Quando Sol, Terra e Lua se alinham, as marés são mais intensas." },
+  { q:"Vênus é mais quente que Mercúrio, embora esteja mais longe do Sol. A melhor explicação é:",
+    o:["Vênus gira mais rápido que Mercúrio.","Vênus tem uma atmosfera densa, rica em gás carbônico, que causa intenso efeito estufa.","Vênus tem muitos oceanos que aquecem a superfície.","Vênus fica mais perto da Terra."],
+    a:1, e:"A atmosfera espessa de CO₂ em Vênus aprisiona calor, elevando a temperatura da superfície a mais de 400 °C. Isso ajuda a entender o efeito estufa também na Terra." },
+  { q:"Por que robôs, como os rovers enviados a Marte, são muito usados na exploração espacial?",
+    o:["Porque não precisam de energia.","Porque conseguem trabalhar em ambientes hostis e distantes, reduzindo riscos e custos em relação a missões tripuladas.","Porque sentem a temperatura como os humanos.","Porque substituem totalmente os cientistas."],
+    a:1, e:"Robôs suportam radiação, frio e longas viagens e coletam dados para cientistas na Terra. Eles ampliam a pesquisa, mas as decisões e análises continuam humanas." }
+];
+const FRASES_OK  = ["Acertou em cheio! 🚀","Órbita perfeita! 🌟","Isso aí, comandante!","Missão cumprida nesta questão! ✅"];
+const FRASES_BAD = ["Quase! Vamos entender juntos. 🔭","Sem problemas, até os astronautas treinam.","Boa tentativa! Veja a explicação."];
+
+let qi = 0, pontos = 0, respondeu = false;
+
+function renderQuiz(){
+  const box = $('#quizBox');
+  if(qi >= QUESTOES.length){
+    const melhor = Math.max(store.get('lovelace_best', 0), pontos);
+    store.set('lovelace_best', melhor);
+    const pct = Math.round(pontos / QUESTOES.length * 100);
+    const msg = pct >= 80 ? "Você é astronauta de nível ENEM!" : pct >= 50 ? "Boa viagem! Revise as vídeo-aulas e tente de novo." : "Vamos treinar mais: assista às vídeo-aulas e volte para a missão.";
+    box.innerHTML = `<div class="result">
+      <div class="big">${pontos}/${QUESTOES.length}</div>
+      <p><strong>${msg}</strong></p>
+      <p class="note">Melhor pontuação neste aparelho: ${melhor}/${QUESTOES.length}</p>
+      <div class="q-actions" style="justify-content:center">
+        <button class="btn" id="qRestart" type="button">🔁 Jogar de novo</button>
+        <a class="btn ghost" href="#musica">🎵 Criar música sobre o tema</a>
+      </div></div>`;
+    $('#qRestart').onclick = () => { qi = 0; pontos = 0; renderQuiz(); };
+    return;
+  }
+  const Q = QUESTOES[qi]; respondeu = false;
+  box.innerHTML = `
+    <div class="q-top"><span>Questão ${qi+1} de ${QUESTOES.length}</span><span>Pontos: ${pontos}</span></div>
+    <div class="bar" aria-hidden="true"><i style="width:${qi/QUESTOES.length*100}%"></i></div>
+    <p class="q-text" id="qText">${esc(Q.q)}</p>
+    <div class="opts" role="group" aria-labelledby="qText">
+      ${Q.o.map((t,i)=>`<button class="opt" type="button" data-i="${i}"><strong>${'ABCD'[i]})</strong> ${esc(t)}</button>`).join('')}
+    </div>
+    <div class="bubble" id="qBubble" role="status"></div>
+    <div class="q-actions">
+      <button class="btn ghost" id="qSpeak" type="button">🔊 Ouvir pergunta</button>
+      <button class="btn" id="qNext" type="button" hidden>Próxima ➜</button>
+    </div>`;
+  $$('.opt', box).forEach(b => b.onclick = () => responder(+b.dataset.i));
+  $('#qSpeak').onclick = () => falar(Q.q + ' ' + Q.o.map((t,i)=>'Alternativa ' + 'ABCD'[i] + '. ' + t).join(' '));
+  $('#qNext').onclick = () => { qi++; renderQuiz(); };
+}
+function responder(i){
+  if(respondeu) return; respondeu = true;
+  const Q = QUESTOES[qi], ok = i === Q.a;
+  if(ok) pontos++;
+  $$('.opt').forEach((b,k) => { b.disabled = true; if(k===Q.a) b.classList.add('correct'); else if(k===i) b.classList.add('wrong'); });
+  const frases = ok ? FRASES_OK : FRASES_BAD;
+  const b = $('#qBubble');
+  b.innerHTML = `<strong>${frases[Math.floor(Math.random()*frases.length)]}</strong><br>${esc(Q.e)}`;
+  b.classList.add('show');
+  const nx = $('#qNext'); nx.hidden = false; nx.textContent = qi === QUESTOES.length-1 ? 'Ver resultado ➜' : 'Próxima ➜';
+  nx.focus();
+}
+
+/* =====================================================================
+   MÚSICA COM IA
+   ===================================================================== */
+const TEMAS_MUSICA = {
+  "Estações do ano e inclinação do eixo da Terra": "a Terra tem o eixo inclinado cerca de 23,5 graus e por isso existem verão, outono, inverno e primavera",
+  "Fases da Lua": "a Lua tem fases nova, crescente, cheia e minguante conforme sua posição em relação ao Sol e à Terra",
+  "Sistema Solar": "os oito planetas do Sistema Solar girando ao redor do Sol, de Mercúrio a Netuno",
+  "Gravidade e órbitas": "a gravidade mantém os planetas em órbita e causa as marés",
+  "Estrelas e fusão nuclear": "o Sol e as estrelas brilham porque fundem hidrogênio em hélio",
+  "Ano-luz e galáxias": "o ano-luz é uma unidade de distância e a Via Láctea é a nossa galáxia",
+  "Robôs na exploração espacial": "robôs como o rover Perseverance exploram Marte e ajudam cientistas na Terra"
+};
+function montarPrompt(){
+  const tema = $('#mTema').value, estilo = $('#mEstilo').value, titulo = $('#mTitulo').value.trim() || 'Viagem com o AstroNAO';
+  $('#mPrompt').value =
+`Título: ${titulo}
+Estilo: ${estilo}
+Idioma: português do Brasil
+Público: estudantes do ensino fundamental e médio
+Tema: ${tema}.
+Conteúdo científico: ${TEMAS_MUSICA[tema]}.
+Personagem: o robô AstroNAO, guia curioso e simpático, que aparece no refrão.
+Pedido: escreva uma letra curta e fácil de memorizar, com 2 estrofes e um refrão repetível, com informações cientificamente corretas, linguagem simples e clima animado.`;
+}
+function initMusica(){
+  $('#mTema').innerHTML = Object.keys(TEMAS_MUSICA).map(t => `<option>${esc(t)}</option>`).join('');
+  $('#mGerar').onclick = montarPrompt;
+  $('#mTema').onchange = montarPrompt; $('#mEstilo').onchange = montarPrompt;
+  montarPrompt();
+  $('#mAbrir').href = CONFIG.musica.appUrl;
+  $('#mAbrir').addEventListener('click', () => { copiarPrompt(true); });
+  $('#mCopiar').onclick = () => copiarPrompt(false);
+  $('#mApi').onclick = enviarApi;
+}
+async function copiarPrompt(silencioso){
+  const txt = $('#mPrompt').value, st = $('#mStatus');
+  try{ await navigator.clipboard.writeText(txt); st.textContent = silencioso ? 'Pedido copiado. Cole no app de música.' : 'Pedido copiado!'; }
+  catch(e){ $('#mPrompt').select(); st.textContent = 'Selecionei o texto: use Ctrl+C para copiar.'; }
+}
+async function enviarApi(){
+  const st = $('#mStatus'), audio = $('#mAudio');
+  if(!CONFIG.musica.apiUrl){ st.textContent = 'API ainda não configurada. Use “Abrir app de música IA” ou preencha CONFIG.musica.apiUrl.'; return; }
+  st.textContent = 'Enviando para a IA… isso pode demorar.'; audio.hidden = true;
+  try{
+    const r = await fetch(CONFIG.musica.apiUrl, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ prompt:$('#mPrompt').value, titulo:$('#mTitulo').value, estilo:$('#mEstilo').value })
+    });
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    if(d.audio_url){ audio.src = d.audio_url; audio.hidden = false; st.textContent = 'Música pronta! 🎶'; audio.play().catch(()=>{}); }
+    else{ st.textContent = 'A API respondeu, mas sem audio_url: ' + JSON.stringify(d).slice(0,160); }
+  }catch(err){ st.textContent = 'Não consegui falar com a API (' + err.message + ').'; }
+}
+
+/* =====================================================================
+   REDAÇÕES
+   ===================================================================== */
+const REDACOES = [
+  {
+    id:"r1", titulo:"Redação 1 · Ciência e tecnologia na escola",
+    tema:"A importância da astronomia e da robótica para a formação científica dos jovens brasileiros",
+    p:[
+      ["Introdução","No século XIX, Ada Lovelace imaginou que as máquinas poderiam ir além do cálculo e manipular símbolos, antecipando o que hoje chamamos de computação. No Brasil contemporâneo, porém, o acesso dos jovens a áreas como a astronomia e a robótica ainda é desigual, o que limita a formação científica e a construção de uma cultura científica ampla. Nesse contexto, personagens didáticos como o AstroNAO, robô-guia do projeto LOVELACE, mostram o potencial de aproximar o céu e a tecnologia da sala de aula, desde que esse acesso seja tratado como direito, e não como privilégio."],
+      ["Desenvolvimento 1","Em primeiro lugar, a astronomia funciona como porta de entrada para as Ciências da Natureza. Fenômenos como as estações do ano, as fases da Lua e as marés envolvem conceitos de física, química e biologia que parecem abstratos quando apresentados apenas em fórmulas. Ao observar o céu, o estudante relaciona teoria e cotidiano, o que favorece uma aprendizagem significativa. Nessa perspectiva, o astrônomo Carl Sagan defendia a popularização da ciência como ferramenta contra o pensamento mágico, pois o encantamento com o universo estimula a dúvida e a análise crítica."],
+      ["Desenvolvimento 2","Além disso, a robótica educativa amplia essa formação ao desenvolver raciocínio lógico, trabalho em equipe e resolução de problemas. A exploração espacial, que utiliza robôs como o rover Perseverance em Marte, demonstra que máquinas permitem alcançar ambientes hostis ao ser humano. Quando a escola reproduz esse processo em atividades práticas, o aluno deixa de ser mero espectador e passa a protagonizar a construção do conhecimento, o que dialoga com o artigo 205 da Constituição Federal, segundo o qual a educação deve visar ao pleno desenvolvimento da pessoa."],
+      ["Conclusão e proposta","Portanto, são necessárias medidas para democratizar esse acesso. Cabe ao Ministério da Educação, em parceria com as secretarias estaduais e municipais, ampliar o oferecimento de kits de robótica e de atividades de astronomia nas escolas públicas, por meio da formação continuada de professores e de parcerias com universidades, a fim de formar jovens críticos e preparados para o mundo científico. Essas ações podem ser acompanhadas por olimpíadas científicas, como a Olimpíada Brasileira de Astronomia e Astronáutica. Assim, o céu deixará de ser distante e o AstroNAO será símbolo de uma educação que une ciência e tecnologia."]
+    ]
+  },
+  {
+    id:"r2", titulo:"Redação 2 · Popularização da ciência espacial",
+    tema:"Desafios para a popularização da ciência espacial entre os jovens no Brasil",
+    p:[
+      ["Introdução","Em 2006, Marcos Pontes tornou-se o primeiro astronauta brasileiro a ir ao espaço, feito que simboliza a capacidade do país de participar da ciência espacial. Contudo, a distância entre esse marco e o cotidiano escolar permanece grande, uma vez que a astronomia ainda é vista como assunto restrito a poucos. Esse cenário é mantido tanto pela desigualdade de estrutura nas escolas quanto pela circulação de desinformação, fatores que precisam ser enfrentados para que o conhecimento do universo alcance todos."],
+      ["Desenvolvimento 1","Em primeiro lugar, a falta de infraestrutura limita o ensino de astronomia. Muitas escolas públicas não dispõem de laboratórios, de acesso estável à internet ou de professores com formação específica na área. Como consequência, conteúdos como gravitação e Sistema Solar ficam restritos ao livro didático, o que dificulta que o aluno perceba a aplicação desses conhecimentos. Dessa forma, a desigualdade de recursos transforma-se em desigualdade de oportunidades, contrariando o princípio constitucional de igualdade de condições para o acesso e a permanência na escola."],
+      ["Desenvolvimento 2","Ademais, a desinformação enfraquece a confiança na ciência. O negacionismo, como a ideia de que a Terra seria plana, ganha espaço nas redes sociais por meio de conteúdos simples e atraentes. Se, por um lado, esse ambiente digital é um risco, por outro pode ser um aliado: videoaulas, jogos e personagens como o AstroNAO, quando bem planejados, tornam a astronomia acessível e divertida. Cabe, portanto, ocupar o espaço digital com informação de qualidade."],
+      ["Conclusão e proposta","Em suma, é fundamental superar esses desafios. Para isso, o Ministério da Educação, em parceria com o Ministério da Ciência, Tecnologia e Inovação, deve criar um programa nacional de astronomia escolar, por meio de plataformas digitais gratuitas com videoaulas, jogos e atividades de observação do céu, além de formação para professores, com a finalidade de reduzir desigualdades e combater a desinformação. Dessa maneira, o interesse pelo cosmos poderá se tornar um caminho de cidadania e de futuro para os jovens brasileiros."]
+    ]
+  },
+  {
+    id:"r3", titulo:"Redação 3 · IA e robôs na educação",
+    tema:"Inteligência artificial e robôs na educação: caminhos para uma nova cultura científica",
+    p:[
+      ["Introdução","Para o educador Paulo Freire, a educação deve contribuir para a autonomia do sujeito. Na atualidade, a inteligência artificial e os robôs educacionais, como o AstroNAO do projeto LOVELACE, surgem como ferramentas capazes de ampliar essa autonomia ao tornar a astronomia e a robótica mais próximas dos estudantes. No entanto, o uso dessas tecnologias exige cuidado, pois pode tanto democratizar o saber quanto aprofundar desigualdades e estimular a dependência. Logo, é preciso discutir como incorporá-las de forma crítica à escola."],
+      ["Desenvolvimento 1","Em primeiro lugar, essas tecnologias favorecem a personalização do ensino e a acessibilidade. Um robô-guia pode propor desafios em diferentes níveis, explicar um conceito mais de uma vez e oferecer recursos como leitura em voz alta, fontes adaptadas e contraste ajustável, que auxiliam estudantes com dislexia ou outras necessidades. Dessa forma, a tecnologia contribui para que cada aluno aprenda no seu ritmo, o que reforça o direito à educação inclusiva."],
+      ["Desenvolvimento 2","Por outro lado, o uso acrítico da inteligência artificial traz riscos. O estudante que apenas copia respostas prontas deixa de desenvolver a argumentação e a capacidade de investigar, habilidades centrais tanto para a ciência quanto para a redação do ENEM. Além disso, nem todas as escolas têm acesso a equipamentos e à conexão necessários, o que pode ampliar a distância entre alunos de diferentes realidades. Assim, a tecnologia, sozinha, não garante uma nova cultura científica."],
+      ["Conclusão e proposta","Diante do exposto, as escolas, com apoio das secretarias de educação, devem incluir o uso consciente da inteligência artificial no currículo, por meio de oficinas em que professores e estudantes aprendam a verificar fontes, a citar o que consultam e a produzir textos próprios, utilizando robôs e aplicativos como apoio. Também cabe ao poder público garantir equipamentos e internet nas escolas públicas, com a finalidade de assegurar que o acesso à tecnologia seja igual para todos. Desse modo, o AstroNAO poderá ser um parceiro da aprendizagem, e não um substituto do pensamento."]
+    ]
+  }
+];
+
+let essayAtual = 0;
+function renderTabs(){
+  const tabs = $('#essayTabs');
+  tabs.innerHTML = REDACOES.map((r,i)=>`<button class="tab" role="tab" type="button" aria-selected="${i===essayAtual}" data-i="${i}">${esc(r.titulo)}</button>`).join('');
+  $$('.tab', tabs).forEach(b => b.onclick = () => { essayAtual = +b.dataset.i; renderTabs(); renderEssay(); });
+}
+function renderEssay(){
+  const r = REDACOES[essayAtual], v = $('#essayView');
+  v.classList.toggle('structure', $('#chkStruct').checked);
+  v.innerHTML = `<h3>${esc(r.titulo)}</h3><div class="theme"><strong>Tema:</strong> ${esc(r.tema)}</div>` +
+    r.p.map(([lab, txt]) => `<p data-label="${esc(lab)}">${esc(txt)}</p>`).join('');
+}
+function imprimirRedacao(){
+  const r = REDACOES[essayAtual], rotulos = $('#chkPrintStruct').checked;
+  const pa = $('#printArea');
+  pa.className = document.body.classList.contains('dys') ? 'dys' : '';
+  pa.innerHTML = `<h1>${esc(r.titulo.replace(/^Redação \d · /,''))}</h1>
+    <div class="sub">Tema: ${esc(r.tema)}<br>Redação modelo · Projeto LOVELACE · AstroNAO</div>` +
+    r.p.map(([lab, txt]) => (rotulos ? `<span class="lbl">${esc(lab.toUpperCase())}</span>` : '') + `<p>${esc(txt)}</p>`).join('') +
+    `<div class="foot">Texto de estudo. Use-o para observar a estrutura (introdução, dois argumentos e proposta de intervenção com agente, ação, meio, finalidade e detalhamento) e escreva a sua própria redação.</div>`;
+  window.print();
+}
+function imprimirPautada(){
+  const pa = $('#printArea');
+  pa.className = '';
+  pa.innerHTML = `<h1>Rascunho · Redação dissertativo-argumentativa</h1>
+    <div class="sub">Tema: ______________________________________________ · Nome: ________________________</div>` +
+    Array.from({length:30}, () => '<div class="line"></div>').join('');
+  window.print();
+}
+function initRedacoes(){
+  renderTabs(); renderEssay();
+  $('#chkStruct').onchange = renderEssay;
+  $('#btnPrint').onclick = imprimirRedacao;
+  $('#btnPrintLines').onclick = imprimirPautada;
+  $('#btnSpeak').onclick = () => { const r = REDACOES[essayAtual]; falar(r.tema + '. ' + r.p.map(x => x[1]).join(' ')); };
+}
+
+/* =====================================================================
+   ACESSIBILIDADE
+   ===================================================================== */
+const A11Y_DEFAULT = { dys:false, size:100, ls:0, ws:0, lh:16, theme:'', ruler:false, reduce:false };
+let a11y = Object.assign({}, A11Y_DEFAULT, store.get('lovelace_a11y', {}));
+
+function aplicarA11y(){
+  const b = document.body;
+  b.classList.toggle('dys', a11y.dys);
+  b.classList.toggle('ruler-on', a11y.ruler);
+  b.classList.toggle('reduce', a11y.reduce);
+  ['theme-cream','theme-light','theme-contrast'].forEach(c => b.classList.remove(c));
+  if(a11y.theme) b.classList.add(a11y.theme);
+  const root = document.documentElement.style;
+  root.setProperty('--fs', a11y.size + '%');
+  root.setProperty('--ls', (a11y.ls/100) + 'em');
+  root.setProperty('--ws', (a11y.ws/100) + 'em');
+  root.setProperty('--lh', (a11y.lh/10));
+  $('#aDys').checked = a11y.dys; $('#aRuler').checked = a11y.ruler; $('#aReduce').checked = a11y.reduce;
+  $('#aSize').value = a11y.size; $('#oSize').textContent = a11y.size + '%';
+  $('#aLs').value = a11y.ls; $('#oLs').textContent = (a11y.ls/100).toFixed(2) + 'em';
+  $('#aWs').value = a11y.ws; $('#oWs').textContent = (a11y.ws/100).toFixed(2) + 'em';
+  $('#aLh').value = a11y.lh; $('#oLh').textContent = (a11y.lh/10).toFixed(1);
+  $('#aTheme').value = a11y.theme;
+  store.set('lovelace_a11y', a11y);
+}
+function initA11y(){
+  const btn = $('#a11yBtn'), panel = $('#a11yPanel');
+  btn.onclick = () => {
+    const open = panel.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+  };
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && panel.classList.contains('open')){ panel.classList.remove('open'); btn.setAttribute('aria-expanded', false); btn.focus(); } });
+  $('#aDys').onchange    = e => { a11y.dys = e.target.checked; aplicarA11y(); };
+  $('#aSize').oninput    = e => { a11y.size = +e.target.value; aplicarA11y(); };
+  $('#aLs').oninput      = e => { a11y.ls = +e.target.value; aplicarA11y(); };
+  $('#aWs').oninput      = e => { a11y.ws = +e.target.value; aplicarA11y(); };
+  $('#aLh').oninput      = e => { a11y.lh = +e.target.value; aplicarA11y(); };
+  $('#aTheme').onchange  = e => { a11y.theme = e.target.value; aplicarA11y(); };
+  $('#aRuler').onchange  = e => { a11y.ruler = e.target.checked; aplicarA11y(); };
+  $('#aReduce').onchange = e => { a11y.reduce = e.target.checked; aplicarA11y(); };
+  $('#aReset').onclick   = () => { a11y = Object.assign({}, A11Y_DEFAULT); aplicarA11y(); };
+  $('#aStop').onclick    = pararVoz;
+  $('#aSpeak').onclick   = () => {
+    const sel = String(window.getSelection()).trim();
+    if(sel) falar(sel); else alert('Selecione um trecho do texto na página e clique em Ouvir.');
+  };
+  // régua de leitura acompanha o mouse/dedo
+  const ruler = $('#ruler');
+  const mover = y => { ruler.style.top = Math.max(0, y - 42) + 'px'; };
+  window.addEventListener('mousemove', e => { if(a11y.ruler) mover(e.clientY); });
+  window.addEventListener('touchmove', e => { if(a11y.ruler && e.touches[0]) mover(e.touches[0].clientY); }, {passive:true});
+  // respeita preferência do sistema por menos movimento
+  if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches && !store.get('lovelace_a11y')) a11y.reduce = true;
+  aplicarA11y();
+}
+
+/* =====================================================================
+   INICIAR
+   ===================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+  renderVideos(); renderQuiz(); initMusica(); initRedacoes(); initA11y();
+});
+</script>
+</body>
+</html>
