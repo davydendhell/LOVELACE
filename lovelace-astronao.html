@@ -403,13 +403,16 @@ body.ruler-on #ruler{ display:block }
 </main>
 
 <footer>
-  <p><strong>LOVELACE</strong> · NAO v6 · CETEC · 2026 - Idealizadores: Davyd Endhell (Endy) e Sophia Paiva (Sofi) <br>Nome inspirado em Ada Lovelace <a href= https://pt.wikipedia.org/wiki/Ada_Lovelace>História da Ada</p>
+  <p><strong>LOVELACE</strong> · NAO v6 · CETEC · 2026 - Idealizadores: Davyd Endhell (Endy) e Sophia Paiva (Sofi)<br>
+  Nome inspirado em Ada Lovelace · <a href="https://pt.wikipedia.org/wiki/Ada_Lovelace" target="_blank" rel="noopener">História da Ada</a></p>
 </footer>
 
 <!-- ======= ÁREA DE IMPRESSÃO ======= -->
 <div id="printArea" aria-hidden="true"></div>
 
-<!-- ======= ACESSIBILIDADE ======= -->
+
+<!-- ======= ACESSIBILIDADES =========== -->
+
 <div id="ruler" aria-hidden="true"></div>
 <button id="a11yBtn" type="button" aria-expanded="false" aria-controls="a11yPanel" aria-label="Abrir painel de acessibilidade">♿</button>
 <aside id="a11yPanel" aria-label="Painel de acessibilidade" role="dialog">
@@ -780,5 +783,37 @@ document.addEventListener('DOMContentLoaded', () => {
   renderVideos(); renderQuiz(); initMusica(); initRedacoes(); initA11y();
 });
 </script>
-</body>
+
+    <!-- Todo o resto do seu código e scripts ficam para cima -->
+
+    <!-- Cole o VLibras aqui, bem no finalzinho: -->
+    <div vw class="enabled">
+      <div vw-access-button class="active"></div>
+      <div vw-plugin-wrapper>
+        <div class="vw-plugin-top-wrapper"></div>
+      </div>
+    </div>
+    <script src="https://vlibras.gov.br"></script>
+    <script>
+      new window.VLibras.Widget({
+        rootPath: 'https://vlibras.gov.br',
+        position: 'L'
+      });
+    </script>
+    <!-- ======= VLIBRAS (Libras) ======= -->
+    <div vw class="enabled">
+      <div vw-access-button class="active"></div>
+      <div vw-plugin-wrapper>
+        <div class="vw-plugin-top-wrapper"></div>
+      </div>
+    </div>
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>
+      new window.VLibras.Widget({
+        rootPath: 'https://vlibras.gov.br/app',
+        position: 'L'
+      });
+    </script>
+
+  </body>
 </html>
